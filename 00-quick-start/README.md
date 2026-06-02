@@ -82,11 +82,11 @@ copilot
 
 You'll be asked to trust the folder containing the repository (if you haven't already). You can trust it one time or across all future sessions.
 
-![img.png](images/img.png)
+![Screenshot: Copilot CLI trust folder prompt](images/img.png)
 
 After trusting the folder, you can sign in with your GitHub account.
 
-```
+```bash
 /login
 ```
 
@@ -102,12 +102,61 @@ What happens next:
 
 Now that you're signed in, let's verify that Copilot CLI is working for you. In the terminal, start the CLI if you haven't already:
 
-```
+```bash
 > Say hello and tell me what you can help with
 ```
 
 After you receive a response, you can exit the CLI:
 
-```
+```bash
 > /exit
 ```
+
+## Using Copilot CLI: Three Core Modes
+
+Copilot CLI provides three distinct modes of operation, each suited for different workflows:
+
+### 1. **Interactive Mode** (Default)
+- **How**: Simply run `copilot` and interact via a chat-like interface
+- **Best For**: Exploration, learning, iterative problem-solving, real-time feedback
+- **Example**: Ask questions, request code reviews, get explanations on-the-fly
+- **Control**: You control every step; Copilot waits for your input
+
+### 2. **Programmatic Mode**
+- **How**: Call Copilot CLI from scripts/programs with structured input/output (JSON)
+- **Best For**: Automation, CI/CD pipelines, batch processing, tool integration
+- **Example**: Generate tests for all Python files, run code reviews in PRs, automated refactoring
+- **Usage**: `copilot --mode programmatic --input "..." --output json`
+- **Advantage**: Machine-readable output; integrate with other tools
+
+### 3. **Autopilot Mode**
+- **How**: Copilot autonomously plans and executes multi-step tasks
+- **Best For**: Large refactorings, comprehensive project transformations
+- **Requirement**: Grants full permissions; Premium requests used autonomously
+- **⚠️ Warning**: Requires careful permission management and cost monitoring
+
+## ⚠️ Important: About Autopilot Mode
+
+Autopilot is powerful but requires caution:
+
+- **Permissions**: Autopilot needs broad access to your repository and systems
+- **Cost**: Automatically uses premium API requests; costs can accumulate
+- **Data Privacy**: Code is sent to external services; ensure compliance with your policies
+- **Reversibility**: Always work on a feature branch and test thoroughly first
+
+**Safe Autopilot Workflow:**
+1. Create a feature branch: `git checkout -b feature/autopilot-test`
+2. Test on a small scope first (e.g., one directory)
+3. Review all changes before merging: `git diff`
+4. Monitor API usage and costs regularly
+5. Revoke permissions if issues arise: GitHub Settings → Applications
+
+**Recommendation**: Master Interactive and Programmatic modes first; use Autopilot only after understanding its capabilities and risks.
+
+## What's Next?
+
+Now that Copilot CLI is installed and verified, you're ready to:
+- **Chapter 01**: Learn interactive workflows and best practices
+- **Chapter 02**: Integrate Copilot CLI into your CI/CD pipeline (Programmatic mode)
+- **Advanced**: Explore Autopilot for large-scale tasks
+
