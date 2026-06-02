@@ -82,7 +82,6 @@ The takeaway: Instant gratification, and you stayed in one continuous session th
 
 ## Modes and Commands
 
-![Copilot CLI modes overview](images/img.png)
 
 🧩 Real-World Analogy: Dining Out
 Think of using GitHub Copilot CLI like going out to eat. From planning the trip to placing your order, different situations call for different approaches:
