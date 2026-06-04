@@ -292,90 +292,109 @@ Context usage: 62k/200k tokens (31%)
 
 💡 **Made a mistake or want to try a different approach?** Use `/rewind` (or press Esc twice) to open a timeline picker that lets you roll back to any earlier point in your conversation, not just the most recent one. This is useful when you went down the wrong path and want to backtrack without starting over entirely.
 
-Pick Up Where You Left Off
-![session-persist-across-days.png](images/session-persist-across-days.png)
+## Pick Up Where You Left Off
+
+![Session timeline showing work resumed across multiple days](images/session-persist-across-days.png)
+
 Sessions auto-save when you exit. Resume days later with full context: files, issues, and progress all remembered.
 
 Imagine this workflow across multiple days:
 
+```bash
 # Monday: Start book app review with a name right from the beginning
 copilot --name book-app-review
 
 > @samples/book-app-project/books.py
 > Review and number all code quality issues
+```
 
 Quality Issues Found:
-1. Duplicate display functions (book_app.py & utils.py) - MEDIUM
+1. Duplicate display functions (`book_app.py` & `utils.py`) - MEDIUM
 2. No input validation for empty strings - MEDIUM
 3. Year can be 0 or negative - LOW
 4. No type hints on all functions - LOW
 5. Missing error logging - LOW
 
+```bash
 > Fix issue #1 (duplicate functions)
 # Work on the fix...
-
 > /exit
 
 # Wednesday: Resume exactly where you left off, by name
 copilot --resume=book-app-review
 
 > What issues remain unfixed from our book app review?
+```
 
-Remaining issues from our book-app-review session:
-2. No input validation for empty strings - MEDIUM
-3. Year can be 0 or negative - LOW
-4. No type hints on all functions - LOW
-5. Missing error logging - LOW
+Remaining issues from our `book-app-review` session:
+- No input validation for empty strings - MEDIUM
+- Year can be 0 or negative - LOW
+- No type hints on all functions - LOW
+- Missing error logging - LOW
 
 Issue #1 (duplicate functions) was fixed on Monday.
 
+```bash
 > Let's tackle issue #2 next
+```
 
 What makes this powerful: Days later, Copilot CLI remembers:
 
-The exact file you were working on
-The numbered list of issues
-Which ones you've already addressed
-The context of your conversation
+- The exact file you were working on
+- The numbered list of issues
+- Which ones you've already addressed
+- The context of your conversation
+
 No re-explaining. No re-reading files. Just continue working.
 
-🎉 You now know the essentials! The @ syntax, session management (--name/--continue/--resume//rename), and context commands (/context//clear) are enough to be highly productive. Everything below is optional. Return to it when you're ready.
+🎉 You now know the essentials! The `@` syntax, session management (`--name`, `--continue`, `--resume`, `/rename`), and context commands (`/context`, `/clear`) are enough to be highly productive. Everything below is optional.
 
-Optional: Going Deeper
-![doing-deeper.png](images/doing-deeper.png)
+## Optional: Going Deeper
 
-These topics build on the essentials above. Pick what interests you, or skip ahead to Practice.
+![Illustration for optional advanced context topics](images/doing-deeper.png)
 
-I want to learn about...	Jump to
-Wildcard patterns and advanced session commands	Additional @ Patterns & Session Commands
-Building on context across multiple prompts	Context-Aware Conversations
-Token limits and /compact	Understanding Context Windows
-How to pick the right files to reference	Choosing What to Reference
-Analyzing screenshots and mockups	Working with Images
+These topics build on the essentials above. Pick what interests you, or skip ahead to practice.
 
-Additional @ Patterns & Session Commands
+| I want to learn about... | Jump to |
+|---|---|
+| Wildcard patterns and advanced session commands | Additional @ Patterns & Session Commands |
+| Building on context across multiple prompts | Context-Aware Conversations |
+| Token limits and `/compact` | Understanding Context Windows |
+| How to pick the right files to reference | Choosing What to Reference |
+| Analyzing screenshots and mockups | Working with Images |
 
-Additional @ Patterns
+### Additional @ Patterns & Session Commands
+
+#### Additional @ Patterns
+
 For power users, Copilot CLI supports wildcard patterns and image references:
 
-Pattern	What It Does
-@folder/*.py	All .py files in folder
-@**/test_*.py	Recursive wildcard: find all test files anywhere
-@image.png	Image file for UI review
-copilot
+| Pattern | What It Does |
+|---|---|
+| `@folder/*.py` | All `.py` files in folder |
+| `@**/test_*.py` | Recursive wildcard: find all test files anywhere |
+| `@image.png` | Image file for UI review |
 
+```bash
+copilot
 > Find all TODO comments in @samples/book-app-project/**/*.py
-View Session Info
-copilot
+```
 
+#### View Session Info
+
+```bash
+copilot
 > /session
 # Shows current session details and workspace summary
 
 > /usage
 # Shows session metrics and statistics
-Share Your Session
-copilot
+```
 
+#### Share Your Session
+
+```bash
+copilot
 > /share file ./my-session.md
 # Exports session as a markdown file
 
@@ -384,142 +403,137 @@ copilot
 
 > /share html
 # Exports session as a self-contained interactive HTML file
-# Useful for sharing polished session reports with teammates or saving for reference
+```
 
-Context-Aware Conversations
+### Context-Aware Conversations
+
 The magic happens when you have multi-turn conversations that build on each other.
 
-Example: Progressive Enhancement
-copilot
+#### Example: Progressive Enhancement
 
+```bash
+copilot
 > @samples/book-app-project/books.py Review the BookCollection class
+```
 
 Copilot CLI: "The class looks functional, but I notice:
 1. Missing type hints on some methods
 2. No validation for empty title/author
 3. Could benefit from better error handling"
 
+```bash
 > Add type hints to all methods
-
-Copilot CLI: "Here's the class with complete type hints..."
-[Shows typed version]
-
 > Now improve error handling
-
-Copilot CLI: "Building on the typed version, here's improved error handling..."
-[Adds validation and proper exceptions]
-
 > Generate tests for this final version
+```
 
-Copilot CLI: "Based on the class with types and error handling..."
-[Generates comprehensive tests]
+### Understanding Context Windows
 
-Understanding Context Windows
-You already know /context and /clear from the essentials. Here's the deeper picture of how context windows work.
+You already know `/context` and `/clear` from the essentials. Here is the deeper picture of how context windows work.
 
-Every AI has a "context window," which is the amount of text it can consider at once.
+Every AI has a context window, which is the amount of text it can consider at once.
 
-Context Window Visualization
+#### Context Window Visualization
+
 The context window is like a desk: it can only hold so much at once. Files, conversation history, and system prompts all take space.
-What Happens at the Limit
+
+#### What Happens at the Limit
+
+```bash
 copilot
-
 > /context
-
 Context usage: 45,000 / 128,000 tokens (35%)
 
 # As you add more files and conversation, this grows
-
 > @large-codebase/
-
 Context usage: 120,000 / 128,000 tokens (94%)
 
 # Warning: Approaching context limit
-
 > @another-large-file.py
-
 Context limit reached. Older context will be summarized.
-The /compact Command
-When your context is getting full but you don't want to lose the conversation, /compact summarizes your history to free up tokens:
+```
 
+#### The `/compact` Command
+
+When your context is getting full but you do not want to lose the conversation, `/compact` summarizes your history to free up tokens:
+
+```bash
 copilot
-
 > /compact
 # Summarizes conversation history, freeing up context space
-# Your key findings and decisions are preserved
-You can also give /compact optional focus instructions to shape what gets prioritized in the summary:
+```
 
+You can also give `/compact` focus instructions to shape what gets prioritized:
+
+```bash
 copilot
-
 > /compact focus on the list of bugs we found and decisions made
-# Summarizes history, keeping bug list and decisions prominent
-💡 When to use focus instructions: If your conversation covered many topics, focus instructions help /compact retain the parts most relevant to your next steps so you don't lose the thread.
+```
 
-Context Efficiency Tips
-Situation	Action	Why
-Starting new topic	/clear	Removes irrelevant context
-Went down wrong path	/rewind	Roll back to any earlier point
-Long conversation	/compact	Summarizes history, frees tokens
-Need specific file	@file.py not @folder/	Loads only what you need
-Hitting limits	/new or /clear	Fresh context
-Multiple topics	Use /rename per topic	Easy to resume right session
-Best Practices for Large Codebases
-Be specific: @samples/book-app-project/books.py instead of @samples/book-app-project/
-Clear context between topics: Use /new or /clear when switching focus
-Use /compact: Summarize conversation to free up context
-Use multiple sessions: One session per feature or topic
+💡 When to use focus instructions: If your conversation covered many topics, focus instructions help `/compact` retain the parts most relevant to your next steps.
 
-Choosing What to Reference
-Not all files are equal when it comes to context. Here's how to choose wisely:
+#### Context Efficiency Tips
 
-File Size Considerations
-File Size	Approximate Tokens	Strategy
-Small (<100 lines)	~500-1,500 tokens	Reference freely
-Medium (100-500 lines)	~1,500-7,500 tokens	Reference specific files
-Large (500+ lines)	7,500+ tokens	Be selective, use specific files
-Very Large (1000+ lines)	15,000+ tokens	Consider splitting or targeting sections
+| Situation | Action | Why |
+|---|---|---|
+| Starting new topic | `/clear` | Removes irrelevant context |
+| Went down wrong path | `/rewind` | Roll back to any earlier point |
+| Long conversation | `/compact` | Summarizes history, frees tokens |
+| Need specific file | `@file.py` not `@folder/` | Loads only what you need |
+| Hitting limits | `/new` or `/clear` | Fresh context |
+| Multiple topics | Use `/rename` per topic | Easy to resume right session |
+
+#### Best Practices for Large Codebases
+
+- Be specific: `@samples/book-app-project/books.py` instead of `@samples/book-app-project/`
+- Clear context between topics: use `/new` or `/clear` when switching focus
+- Use `/compact`: summarize conversation to free up context
+- Use multiple sessions: one session per feature or topic
+
+### Choosing What to Reference
+
+Not all files are equal when it comes to context. Here is how to choose wisely.
+
+#### File Size Considerations
+
+| File Size | Approximate Tokens | Strategy |
+|---|---|---|
+| Small (<100 lines) | ~500-1,500 tokens | Reference freely |
+| Medium (100-500 lines) | ~1,500-7,500 tokens | Reference specific files |
+| Large (500+ lines) | 7,500+ tokens | Be selective, use specific files |
+| Very Large (1000+ lines) | 15,000+ tokens | Consider splitting or targeting sections |
+
 Concrete examples:
 
-The book app's 4 Python files combined ≈ 2,000-3,000 tokens
-A typical Python module (200 lines) ≈ 3,000 tokens
-A Flask API file (400 lines) ≈ 6,000 tokens
-Your package.json ≈ 200-500 tokens
-A short prompt + response ≈ 500-1,500 tokens
-💡 Quick estimate for code: Multiply lines of code by ~15 to get approximate tokens. Keep in mind this is only an estimate.
+- The book app's 4 Python files combined ~= 2,000-3,000 tokens
+- A typical Python module (200 lines) ~= 3,000 tokens
+- A Flask API file (400 lines) ~= 6,000 tokens
+- Your `package.json` ~= 200-500 tokens
+- A short prompt + response ~= 500-1,500 tokens
 
-What to Include vs. Exclude
+💡 Quick estimate for code: multiply lines of code by ~15 to get approximate tokens.
+
+#### What to Include vs. Exclude
+
 High value (include these):
 
-Entry points (book_app.py, main.py, app.py)
-The specific files you're asking about
-Files directly imported by your target file
-Configuration files (requirements.txt, pyproject.toml)
-Data models or dataclasses
+- Entry points (`book_app.py`, `main.py`, `app.py`)
+- The specific files you are asking about
+- Files directly imported by your target file
+- Configuration files (`requirements.txt`, `pyproject.toml`)
+- Data models or dataclasses
+
 Lower value (consider excluding):
 
-Generated files (compiled output, bundled assets)
-Node modules or vendor directories
-Large data files or fixtures
-Files unrelated to your question
-The Specificity Spectrum
-Less specific ────────────────────────► More specific
-@samples/book-app-project/                      @samples/book-app-project/books.py:47-52
-│                                       │
-└─ Scans everything                     └─ Just what you need
-(uses more context)                      (preserves context)
-When to go broad (@samples/book-app-project/):
+- Generated files (compiled output, bundled assets)
+- Node modules or vendor directories
+- Large data files or fixtures
+- Files unrelated to your question
 
-Initial codebase exploration
-Finding patterns across many files
-Architecture reviews
-When to go specific (@samples/book-app-project/books.py):
+#### Practical Example: Staged Context Loading
 
-Debugging a particular issue
-Code review of a specific file
-Asking about a single function
-Practical Example: Staged Context Loading
+```bash
 copilot
-
 # Step 1: Start with structure
 > @package.json What frameworks does this project use?
 
@@ -531,141 +545,161 @@ copilot
 
 # Step 4: Add related files only as needed
 > @samples/book-app-project/book_app.py @samples/book-app-project/books.py How does the CLI use the BookCollection?
+```
+
 This staged approach keeps context focused and efficient.
 
-Working with Images
-You can include images in your conversations using the @ syntax, or simply paste from your clipboard (Cmd+V / Ctrl+V). Copilot CLI can analyze screenshots, mockups, and diagrams to help with UI debugging, design implementation, and error analysis.
+### Working with Images
 
+You can include images in your conversations using the `@` syntax, or simply paste from your clipboard (Cmd+V / Ctrl+V). Copilot CLI can analyze screenshots, mockups, and diagrams to help with UI debugging, design implementation, and error analysis.
+
+```bash
 copilot
-
 > @images/screenshot.png What is happening in this image?
 
 > @images/mockup.png Write the HTML and CSS to match this design. Place it in a new file called index.html and put the CSS in styles.css.
+```
+
 📖 Learn more: See Additional Context Features for supported formats, practical use cases, and tips for combining images with code.
-> 
-> ▶️ Try It Yourself
-Full Project Review
-The course includes sample files you can review directly. Start copilot and run the prompt shown next:
 
+## ▶️ Try It Yourself
+
+### Full Project Review
+
+The course includes sample files you can review directly. Start Copilot and run the prompt shown next:
+
+```bash
 copilot
-
 > @samples/book-app-project/ Give me a code quality review of this project
+```
 
-# Copilot CLI will identify issues like:
-# - Duplicate display functions
-# - Missing input validation
-# - Inconsistent error handling
-💡 Want to try with your own files? Create a small Python project (mkdir -p my-project/src), add some .py files, then use @my-project/src/ to review them. You can ask copilot to create sample code for you if you'd like!
+Copilot CLI will identify issues like duplicate display functions, missing input validation, and inconsistent error handling.
 
-Session Workflow
+💡 Want to try with your own files? Create a small Python project (`mkdir -p my-project/src`), add some `.py` files, then use `@my-project/src/` to review them.
+
+### Session Workflow
+
+```bash
 copilot
-
 > /rename book-app-review
 > @samples/book-app-project/books.py Let's add input validation for empty titles
-
-[Copilot CLI suggests validation approach]
-
 > Implement that fix
 > Now consolidate the duplicate display functions in @samples/book-app-project/
 > /exit
 
 # Later - resume where you left off
 copilot --continue
-
 > Generate tests for the changes we made
+```
+
 After completing the demos, try these variations:
 
-Cross-File Challenge: Analyze how book_app.py and books.py work together:
+- Cross-file challenge: analyze how `book_app.py` and `books.py` work together.
+- Session challenge: start, rename, exit, then resume with `--continue`.
+- Context challenge: run `/context`, then `/compact`, and compare token usage.
+- Self-check: explain why `@folder/` is more powerful than opening each file individually.
 
-copilot
-> @samples/book-app-project/book_app.py @samples/book-app-project/books.py
-> What's the relationship between these files? Are there any code smells?
-Session Challenge: Start a session, name it with /rename my-first-session, work on something, exit with /exit, then run copilot --continue. Does it remember what you were doing?
+## Assignment
 
-Context Challenge: Run /context mid-session. How many tokens are you using? Try /compact and check again. (See Understanding Context Windows in Going Deeper for more on /compact.)
+### Main Challenge: Trace the Data Flow
 
-Self-Check: You understand context when you can explain why @folder/ is more powerful than opening each file individually.
+The hands-on examples focused on code quality and validation. Now practice the same context skills on tracing how data moves through the app.
 
+1. Start an interactive session with `copilot`.
+2. Reference `books.py` and `book_app.py` together and trace how a book goes from user input to `data.json`.
+3. Bring in `data.json` and ask what fails if the file is missing or corrupted.
+4. Ask for a cross-file improvement strategy between `books.py` and `utils.py`.
+5. Rename the session with `/rename data-flow-analysis`.
+6. Exit with `/exit`, then resume with `copilot --continue` and ask a follow-up.
 
-Assignment
-Main Challenge: Trace the Data Flow
-The hands-on examples focused on code quality reviews and input validation. Now practice the same context skills on a different task, tracing how data moves through the app:
-
-Start an interactive session: copilot
-Reference books.py and book_app.py together: @samples/book-app-project/books.py @samples/book-app-project/book_app.py Trace how a book goes from user input to being saved in data.json. What functions are involved at each step?
-Bring in the data file for additional context: @samples/book-app-project/data.json What happens if this JSON file is missing or corrupted? Which functions would fail?
-Ask for a cross-file improvement: @samples/book-app-project/books.py @samples/book-app-project/utils.py Suggest a consistent error-handling strategy that works across both files.
-Rename the session: /rename data-flow-analysis
-Exit with /exit, then resume with copilot --continue and ask a follow-up question about the data flow
 Success criteria: You can trace data across multiple files, resume a named session, and get cross-file suggestions.
 
-💡 Hints (click to expand)
+### 💡 Hints
+
 Getting started:
 
+```bash
 cd /path/to/copilot-cli-for-beginners
 copilot
 > @samples/book-app-project/books.py @samples/book-app-project/book_app.py Trace how a book goes from user input to being saved in data.json.
 > @samples/book-app-project/data.json What happens if this file is missing or corrupted?
 > /rename data-flow-analysis
 > /exit
-Then resume with: copilot --continue
+```
+
+Then resume with:
+
+```bash
+copilot --continue
+```
 
 Useful commands:
 
-@file.py - Reference a single file
-@folder/ - Reference all files in a folder (note the trailing /)
-/context - Check how much context you're using
-/rename <name> - Name your session for easy resuming
+- `@file.py` - Reference a single file
+- `@folder/` - Reference all files in a folder (note the trailing `/`)
+- `/context` - Check how much context you are using
+- `/rename <name>` - Name your session for easy resuming
 
-🔧 Common Mistakes & Troubleshooting (click to expand)
-Common Mistakes
-Mistake	What Happens	Fix
-Forgetting @ before filenames	Copilot CLI treats "books.py" as plain text	Use @samples/book-app-project/books.py to reference files
-Expecting sessions to persist automatically	Starting copilot fresh loses all previous context	Use --continue (last session) or --resume (pick a session)
-Referencing files outside current directory	"Permission denied" or "File not found" errors	Use /add-dir /path/to/directory to grant access
-Not using /clear when switching topics	Old context confuses responses about the new topic	Run /clear before starting a different task
-Troubleshooting
-"File not found" errors - Make sure you're in the correct directory:
+### 🔧 Common Mistakes & Troubleshooting
 
-pwd  # Check current directory
-ls   # List files
+#### Common Mistakes
 
-# Then start copilot and use relative paths
+| Mistake | What Happens | Fix |
+|---|---|---|
+| Forgetting `@` before filenames | Copilot CLI treats `books.py` as plain text | Use `@samples/book-app-project/books.py` |
+| Expecting sessions to persist automatically | Starting fresh loses previous context | Use `--continue` or `--resume` |
+| Referencing files outside current directory | Permission denied or file not found | Use `/add-dir /path/to/directory` |
+| Not using `/clear` when switching topics | Old context confuses responses | Run `/clear` before the new task |
+
+#### Troubleshooting
+
+"File not found" errors - make sure you are in the correct directory:
+
+```bash
+pwd
+ls
 copilot
-
 > Review @samples/book-app-project/books.py
-"Permission denied" - Add the directory to your allowed list:
+```
 
+"Permission denied" - add the directory to your allowed list:
+
+```bash
 copilot --add-dir /path/to/directory
-
 # Or in a session:
 > /add-dir /path/to/directory
+```
+
 Context fills up too quickly:
 
-Be more specific with file references
-Use /clear between different topics
-Split work across multiple sessions
+- Be more specific with file references
+- Use `/clear` between different topics
+- Split work across multiple sessions
 
-Summary
-🔑 Key Takeaways
-@ syntax gives Copilot CLI context about files, directories, and images
-Multi-turn conversations build on each other as context accumulates
-Sessions auto-save: name them at startup with --name, resume by name with --resume=<name>, or use --continue to pick up the most recent session
-Context windows have limits: manage them with /clear, /compact, /context, /new, and /rewind. Use /compact focus on <topic> to shape what gets kept in the summary
-Persistent memory (/memory) lets Copilot CLI remember preferences and facts across all sessions — not just the current one
-Permission flags (--add-dir, --allow-all) control multi-directory access. Use them wisely!
-Image references (@screenshot.png) help debug UI issues visually
+## Summary
+
+### 🔑 Key Takeaways
+
+- `@` syntax gives Copilot CLI context about files, directories, and images
+- Multi-turn conversations build on each other as context accumulates
+- Sessions auto-save: use `--name`, `--resume=<name>`, or `--continue`
+- Manage context limits with `/clear`, `/compact`, `/context`, `/new`, and `/rewind`
+- Persistent memory (`/memory`) stores reusable preferences across sessions
+- Permission flags (`--add-dir`, `--allow-all`) control multi-directory access
+- Image references (for example `@screenshot.png`) help debug UI issues visually
+
 📚 Official Documentation: Use Copilot CLI for the complete reference on context, sessions, and working with files.
 
 📋 Quick Reference: See the GitHub Copilot CLI command reference for a complete list of commands and shortcuts.
 
-What's Next
-Now that you can give Copilot CLI context, let's put it to work on real development tasks. The context techniques you just learned (file references, cross-file analysis, and session management) are the foundation for the powerful workflows in the next chapter.
+## What's Next
+
+Now that you can give Copilot CLI context, put it to work on real development tasks. The techniques you just learned are the foundation for the workflows in the next chapter.
 
 In Chapter 03: Development Workflows, you'll learn:
 
-Code review workflows
-Refactoring patterns
-Debugging assistance
-Test generation
-Git integration
+- Code review workflows
+- Refactoring patterns
+- Debugging assistance
+- Test generation
+- Git integration
