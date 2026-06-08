@@ -1,4 +1,11 @@
-from typing import Tuple, Iterable, Any, Protocol
+from typing import Tuple, Iterable, Any, Protocol, Optional
+from exceptions import (
+    InvalidMenuChoiceError,
+    TooManyAttemptsError,
+    InputInterruptedError,
+    EmptyTitleError,
+    InvalidYearError,
+)
 
 
 class BookLike(Protocol):
@@ -8,6 +15,80 @@ class BookLike(Protocol):
     author: str
     year: int
     read: bool
+
+
+# ============================================================================
+# DATA VALIDATION & PROCESSING FUNCTIONS (Pure Logic, No Display)
+# ============================================================================
+
+def validate_menu_choice(choice: str, valid_choices: set[str]) -> Optional[str]:
+    """Validate a menu choice input.
+    
+    Args:
+        choice: The user's input string.
+        valid_choices: Set of valid choice strings.
+    
+    Returns:
+        Error message if invalid, None if valid.
+    """
+    if not choice:
+        return "Input cannot be empty. Please enter a number between 1 and 5."
+    
+    if not choice.isdigit():
+        return f"'{choice}' is not a valid number. Please enter a number between 1 and 5."
+    
+    if choice not in valid_choices:
+        return f"'{choice}' is out of range. Please enter a number between 1 and 5."
+    
+    return None
+
+
+def parse_year_input(year_input: str) -> int:
+    """Parse and validate year input.
+    
+    Args:
+        year_input: The year string from user input.
+    
+    Returns:
+        Parsed year value (0 if empty).
+    
+    Raises:
+        InvalidYearError: If year_input cannot be converted to integer.
+    """
+    if year_input == "":
+        return 0
+    
+    try:
+        year = int(year_input)
+        return year
+    except ValueError:
+        raise InvalidYearError(year_input)
+
+
+def format_book_display(book: BookLike, index: int) -> str:
+    """Format a single book for display.
+    
+    Args:
+        book: The book object to format.
+        index: The index number for display.
+    
+    Returns:
+        Formatted string representation of the book.
+    """
+    try:
+        title = getattr(book, "title", "Untitled")
+        author = getattr(book, "author", "Unknown")
+        year = getattr(book, "year", 0)
+        read = getattr(book, "read", False)
+        status = "✅ Read" if bool(read) else "📖 Unread"
+        return f"{index}. {title} by {author} ({year}) - {status}"
+    except Exception as exc:
+        return f"{index}. <error reading book: {exc}>"
+
+
+# ============================================================================
+# DISPLAY FUNCTIONS (Pure Display, No Business Logic)
+# ============================================================================
 
 
 def print_menu() -> None:
@@ -27,8 +108,8 @@ def get_user_choice() -> str:
         A string in {'1','2','3','4','5'} representing the selected option.
 
     Raises:
-        RuntimeError: if input is interrupted (EOF/KeyboardInterrupt).
-        ValueError: if too many invalid attempts are made.
+        InputInterruptedError: if input is interrupted (EOF/KeyboardInterrupt).
+        TooManyAttemptsError: if too many invalid attempts are made.
     """
     valid_choices = {"1", "2", "3", "4", "5"}
     max_attempts = 3
@@ -37,26 +118,16 @@ def get_user_choice() -> str:
         for attempt in range(1, max_attempts + 1):
             choice = input("Choose an option (1-5): ").strip()
 
-            # Handle empty input
-            if not choice:
-                print("Input cannot be empty. Please enter a number between 1 and 5.")
-                continue
-
-            # Handle non-numeric input
-            if not choice.isdigit():
-                print(f"'{choice}' is not a valid number. Please enter a number between 1 and 5.")
-                continue
-
-            # Handle out-of-range numeric input
-            if choice not in valid_choices:
-                print(f"'{choice}' is out of range. Please enter a number between 1 and 5.")
+            error = validate_menu_choice(choice, valid_choices)
+            if error:
+                print(error)
                 continue
 
             return choice
 
-        raise ValueError("Too many invalid attempts for menu choice.")
-    except (EOFError, KeyboardInterrupt) as exc:
-        raise RuntimeError("Input aborted by user while choosing menu option.") from exc
+        raise TooManyAttemptsError("menu choice", max_attempts)
+    except (EOFError, KeyboardInterrupt):
+        raise InputInterruptedError("menu choice")
 
 
 def get_book_details() -> Tuple[str, str, int]:
@@ -68,21 +139,21 @@ def get_book_details() -> Tuple[str, str, int]:
 
     Input Behavior:
         - **Title** (required): The user is prompted up to 3 times if they
-          provide an empty string. After 3 failed attempts, a ValueError
-          is raised.
+          provide an empty string. After 3 failed attempts, raises EmptyTitleError.
         - **Author** (optional): If left blank, defaults to ``'Unknown'``.
-        - **Year** (optional): If left blank or non-numeric, defaults to ``0``.
+        - **Year** (optional): If left blank, defaults to ``0``. Invalid input
+          defaults to 0 with a warning.
 
     Returns:
         Tuple[str, str, int]: A 3-tuple containing:
             - title (str): The book's title (guaranteed non-empty).
             - author (str): The book's author (``'Unknown'`` if not provided).
-            - year (int): The publication year (``0`` if unknown or invalid).
+            - year (int): The publication year (``0`` if unknown).
 
     Raises:
-        ValueError: If the user fails to provide a non-empty title after
+        EmptyTitleError: If the user fails to provide a non-empty title after
             the maximum number of attempts (3).
-        RuntimeError: If input is interrupted by the user (e.g., Ctrl+C
+        InputInterruptedError: If input is interrupted by the user (e.g., Ctrl+C
             or Ctrl+D / EOF).
 
     Example:
@@ -104,7 +175,7 @@ def get_book_details() -> Tuple[str, str, int]:
                 break
             print("Title cannot be empty. Please enter a title.")
         if not title:
-            raise ValueError("Title is required but was not provided after multiple attempts.")
+            raise EmptyTitleError()
 
         # Author is optional - default to 'Unknown'
         author = input("Enter author (leave blank for 'Unknown'): ").strip()
@@ -112,18 +183,15 @@ def get_book_details() -> Tuple[str, str, int]:
             author = "Unknown"
 
         year_input = input("Enter publication year (leave blank if unknown): ").strip()
-        if year_input == "":
+        try:
+            year = parse_year_input(year_input)
+        except InvalidYearError:
+            print("Invalid year. Defaulting to 0.")
             year = 0
-        else:
-            try:
-                year = int(year_input)
-            except ValueError:
-                print("Invalid year. Defaulting to 0.")
-                year = 0
 
         return title, author, year
-    except (EOFError, KeyboardInterrupt) as exc:
-        raise RuntimeError("Input aborted by user while entering book details.") from exc
+    except (EOFError, KeyboardInterrupt):
+        raise InputInterruptedError("book details entry")
 
 
 def print_books(books: Iterable[BookLike]) -> None:
@@ -144,13 +212,49 @@ def print_books(books: Iterable[BookLike]) -> None:
 
     print("\nYour Books:")
     for index, book in enumerate(book_list, start=1):
-        try:
-            title = getattr(book, "title", "Untitled")
-            author = getattr(book, "author", "Unknown")
-            year = getattr(book, "year", 0)
-            read = getattr(book, "read", False)
-            status = "✅ Read" if bool(read) else "📖 Unread"
-            print(f"{index}. {title} by {author} ({year}) - {status}")
-        except Exception as exc:
-            print(f"{index}. <error reading book: {exc}>")
-            continue
+        formatted = format_book_display(book, index)
+        print(formatted)
+
+
+def print_add_book_header() -> None:
+    """Display the header for adding a new book."""
+    print("\nAdd a New Book\n")
+
+
+def print_book_added_success() -> None:
+    """Display success message after adding a book."""
+    print("\nBook added successfully.\n")
+
+
+def print_error(error_message: str) -> None:
+    """Display an error message."""
+    print(f"\nError: {error_message}\n")
+
+
+def print_remove_book_header() -> None:
+    """Display the header for removing a book."""
+    print("\nRemove a Book\n")
+
+
+def print_book_removed() -> None:
+    """Display message after attempting to remove a book."""
+    print("\nBook removed if it existed.\n")
+
+
+def print_find_books_header() -> None:
+    """Display the header for finding books by author."""
+    print("\nFind Books by Author\n")
+
+
+def print_help_message() -> None:
+    """Display the help message with available commands."""
+    print("""
+Book Collection Helper
+
+Commands:
+  list     - Show all books
+  add      - Add a new book
+  remove   - Remove a book by title
+  find     - Find books by author
+  help     - Show this help message
+""")
