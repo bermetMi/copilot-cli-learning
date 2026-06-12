@@ -224,3 +224,327 @@ copilot
 
 # Refactor with confidence — tests verify behavior is preserved
 ```
+
+Workflow 3: Debugging
+
+![debugging.png](images/debugging.png)
+
+Simple Debugging
+Try this first: 
+> @samples/book-app-buggy/books_buggy.py Users report that searching for "The Hobbit" returns no results even though it's in the data. Debug why.
+
+copilot
+
+# Pattern: "Expected X but got Y"
+> @samples/book-app-buggy/books_buggy.py Users report that searching for "The Hobbit" returns no results even though it's in the data. Debug why.
+
+# Pattern: "Unexpected behavior"
+> @samples/book-app-buggy/book_app_buggy.py When I remove a book that doesn't exist, the app says it was removed. Help me find why.
+
+# Pattern: "Wrong results"
+> @samples/book-app-buggy/books_buggy.py When I mark one book as read, ALL books get marked. What's the bug?
+
+💡 Debugging tip: Describe the symptom (what you see) and the expectation (what should happen). Copilot CLI figures out the rest.
+
+The "Bug Detective" - AI Finds RELATED Bugs
+This is where context-aware debugging shines. Try this scenario with the buggy book app. Provide the whole file via @ and describe only the user-reported symptom. Copilot CLI will trace the root cause and may spot additional bugs nearby.
+
+copilot
+
+> @samples/book-app-buggy/books_buggy.py
+> Users report: "Finding books by author name doesn't work for partial names"
+> Debug why this happens
+
+                                                                                                                                                                                                              ┃
+● Found the bug! On line 95, the find_by_author method uses exact equality (==) instead of checking if the search term is contained within the author name. This means searching for "Tolkien" won't match      ┃
+"J.R.R. Tolkien" or any partial author name.                                                                                                                                                                  ┃
+┃
+The Issue:                                                                                                                                                                                                    ┃
+┃
+return [b for b in self.books if b.author == author]                                                                                                                                                         ┃
+┃
+The Fix:                                                                                                                                                                                                      ┃
+Should use case-insensitive partial matching like:                                                                                                                                                            ┃
+┃
+return [b for b in self.books if author.lower() in b.author.lower()]                                                                                                                                         ┃
+┃
+This will allow:                                                                                                                                                                                              ┃
+┃
+- "Tolkien" to match "J.R.R. Tolkien"                                                                                                                                                                        ┃
+- "rowling" to match "J.K. Rowling"                                                                                                                                                                          ┃
+- "king" to match "Stephen King"   
+
+Why this matters: Copilot CLI reads the whole file, understands the context of your bug report, and gives you a specific fix with a clear explanation.
+
+💡 Bonus: Because Copilot CLI analyzes the entire file, it often discovers other issues you didn't ask about. For example, while fixing the author search, Copilot CLI might also notice the case-sensitivity bug in find_book_by_title!
+
+Real-World Security Sidebar
+While debugging your own code is important, understanding security vulnerabilities in production applications is critical. Try this example: Point Copilot CLI at an unfamiliar file and ask it to audit for security issues.
+
+copilot
+
+> @samples/buggy-code/python/user_service.py Find all security vulnerabilities in this Python user service
+
+This file demonstrates real-world security patterns you'll encounter in production apps.
+💡 Common security terms you'll encounter:
+
+SQL Injection: When user input is put directly into a database query, allowing attackers to run malicious commands
+Parameterized queries: The safe alternative - placeholders (?) separate user data from SQL commands
+Race condition: When two operations happen at the same time and interfere with each other
+XSS (Cross-Site Scripting): When attackers inject malicious scripts into web pages
+
+
+Understanding an Error
+Paste a stack trace directly into your prompt along with an @ file reference so Copilot CLI can map the error to the source code.
+
+copilot
+
+> I'm getting this error:
+> AttributeError: 'NoneType' object has no attribute 'title'
+>     at show_books (book_app.py:19)
+>
+> @samples/book-app-project/book_app.py Explain why and how to fix it
+
+Debugging with Test Case
+Describe the exact input and observed output to give Copilot CLI a concrete, reproducible test case to reason about.
+
+copilot
+
+> @samples/book-app-buggy/books_buggy.py The remove_book function has a bug. When I try to remove "Dune",
+> it also removes "Dune Messiah". Debug this: explain the root cause and provide a fix.
+
+Trace an Issue Through Code
+Reference multiple files and ask Copilot CLI to follow the data flow across them to locate where the issue originates.
+
+copilot
+
+> Users report that the book list numbering starts at 0 instead of 1.
+> @samples/book-app-buggy/book_app_buggy.py @samples/book-app-buggy/books_buggy.py
+> Trace through the list display flow and identify where the issue occurs
+
+Understanding Data Issues
+Include a data file alongside the code that reads it so Copilot CLI understands the full picture when suggesting error-handling improvements.
+
+copilot
+
+> @samples/book-app-project/data.json @samples/book-app-project/books.py
+> Sometimes the JSON file gets corrupted and the app crashes. How should we handle this gracefully?
+
+Workflow 4: Test Generation - Generate comprehensive tests and edge cases automatically
+![test-generation.png](images/test-generation.png)
+
+Try this first: @samples/book-app-project/books.py Generate pytest tests for all functions including edge cases
+
+The "Test Explosion" - 2 Tests vs 15+ Tests
+Manually writing tests, developers typically create 2-3 basic tests:
+
+Test valid input
+Test invalid input
+Test an edge case
+Watch what happens when you ask Copilot CLI to generate comprehensive tests! This prompt uses a structured bullet list with an @ file reference to guide Copilot CLI toward thorough test coverage:
+
+copilot
+
+> @samples/book-app-project/books.py Generate comprehensive pytest tests. Include tests for:
+> - Adding books
+> - Removing books
+> - Finding by title
+> - Finding by author
+> - Marking as read
+> - Edge cases with empty data
+
+Unit Tests
+Target a single function and enumerate the input categories you want tested so Copilot CLI generates focused, thorough unit tests.
+
+copilot
+
+> @samples/book-app-project/utils.py Generate comprehensive pytest tests for get_book_details covering:
+> - Valid input
+> - Empty strings
+> - Invalid year formats
+> - Very long titles
+> - Special characters in author names
+
+
+Running Tests
+Ask Copilot CLI a plain-English question about your toolchain. It can generate the right shell command for you.
+
+copilot
+
+> How do I run the tests? Show me the pytest command.
+
+# Copilot CLI responds:
+# cd samples/book-app-project && python -m pytest tests/
+# Or for verbose output: python -m pytest tests/ -v
+# To see print statements: python -m pytest tests/ -s
+
+Test for Specific Scenarios
+List advanced or tricky scenarios you want covered so Copilot CLI goes beyond the happy path.
+
+copilot
+
+> @samples/book-app-project/books.py Generate tests for these scenarios:
+> - Adding duplicate books (same title and author)
+> - Removing a book by partial title match
+> - Finding books when collection is empty
+> - File permission errors during save
+> - Concurrent access to the book collection
+
+Add Tests to Existing File
+Ask for additional tests for a single function so Copilot CLI generates new cases that complement what you already have.
+
+copilot
+
+> @samples/book-app-project/books.py
+> Generate additional tests for the find_by_author function with edge cases:
+> - Author name with hyphens (e.g., "Jean-Paul Sartre")
+> - Author with multiple first names
+> - Empty string as author
+> - Author name with accented characters
+
+Workflow 5: Git Integration - Commit messages, PR descriptions, /pr, /delegate, and /diff
+![git-integration.png](images/git-integration.png)
+💡 This workflow assumes basic git familiarity (staging, committing, branches). If git is new to you, try the other four workflows first.
+
+Generate Commit Messages
+Try this first: copilot -p "Generate a conventional commit message for: $(git diff --staged)" — stage some changes, then run this to see Copilot CLI write your commit message.
+
+
+# See what changed
+git diff --staged
+
+# Generate commit message using [Conventional Commit](../GLOSSARY.md#conventional-commit) format
+# (structured messages like "feat(books): add search" or "fix(data): handle empty input")
+copilot -p "Generate a conventional commit message for: $(git diff --staged)"
+
+# Output: "feat(books): add partial author name search
+#
+# - Update find_by_author to support partial matches
+# - Add case-insensitive comparison
+# - Improve user experience when searching authors"
+
+Explain Changes
+Pipe the output of git show into a -p prompt to get a plain-English summary of the last commit.
+
+# What did this commit change?
+copilot -p "Explain what this commit does: $(git show HEAD --stat)"
+
+PR Description
+Combine git log output with a structured prompt template to auto-generate a complete pull request description.
+
+# Generate PR description from branch changes
+copilot -p "Generate a pull request description for these changes:
+$(git log main..HEAD --oneline)
+
+Include:
+- Summary of changes
+- Why these changes were made
+- Testing done
+- Breaking changes? (yes/no)"
+
+Using /pr in Interactive Mode for the Current Branch
+If you're working with a branch in Copilot CLI's interactive mode, you can use the /pr command to work with pull requests. Use /pr to view a PR, create a new PR, fix an existing PR, or let Copilot CLI auto-decide based on the branch state.
+
+copilot
+
+> /pr [view|create|fix|auto]
+
+Review Before Push
+Use git diff main..HEAD inside a -p prompt for a quick pre-push sanity check across all branch changes.
+
+# Last check before pushing
+copilot -p "Review these changes for issues before I push:
+$(git diff main..HEAD)"
+
+Using /delegate for Background Tasks
+The /delegate command hands off work to the GitHub Copilot cloud agent. Use the /delegate slash command (or the & shortcut) to offload a well-defined task to a background agent.
+
+copilot
+
+> /delegate Add input validation to the login form
+
+# Or use the & prefix shortcut:
+> & Fix the typo in the README header
+
+# Copilot CLI:
+# 1. Commits your changes to a new branch
+# 2. Opens a draft pull request
+# 3. Works in the background on GitHub
+# 4. Requests your review when done
+This is great for well-defined tasks you want completed while you focus on other work.
+
+
+Using /diff to Review Session Changes
+The /diff command shows all changes made during your current session. Use this slash command to see a visual diff of everything Copilot CLI has modified before you commit.
+
+copilot
+
+# After making some changes...
+> /diff
+
+# Shows a visual diff of all files modified in this session
+# Great for reviewing before committing
+
+Quick Tip: Research Before You Plan or Code
+When you need to investigate a library, understand best practices, or explore an unfamiliar topic, use /research to run a deep research investigation before writing any code:
+
+copilot
+
+> /research What are the best Python libraries for validating user input in CLI apps?
+Copilot searches GitHub repositories and web sources, then returns a summary with references. This is useful when you're about to start a new feature and want to make informed decisions first. You can share the results using /share.
+
+💡 Tip: /research works well before /plan. Research the approach, then plan the implementation.
+
+Putting It All Together: Bug Fix Workflow
+Here's a complete workflow for fixing a reported bug:
+
+# 1. Understand the bug report
+copilot
+
+> Users report: 'Finding books by author name doesn't work for partial names'
+> @samples/book-app-project/books.py Analyze and identify the likely cause
+
+# 2. Debug the issue and fix (continuing in same session)
+> Based on the analysis, show me the find_by_author function and explain the issue
+
+> Fix the find_by_author function to handle partial name matches
+
+# 3. Generate tests for the fix
+> @samples/book-app-project/books.py Generate pytest tests specifically for:
+> - Full author name match
+> - Partial author name match
+> - Case-insensitive matching
+> - Author name not found
+
+# Exit the interactive session
+
+> /exit
+
+# 4. Run git add
+
+# Stage the changes so git diff --staged has something to work with
+git add .
+
+# 5. Generate commit message
+copilot -p "Generate commit message for: $(git diff --staged)"
+
+# Example Output: "fix(books): support partial author name search"
+
+# 6. Commit changes (optional)
+
+git commit -m "<paste generated message>"
+Bug Fix Workflow Summary
+Step	Action	Copilot Command
+1	Understand the bug	> [describe bug] @relevant-file.py Analyze the likely cause
+2	Analysis and fix	> Show me the function and fix the issue
+3	Generate tests	> Generate tests for [specific scenarios]
+4	Stage changes	git add .
+5	Generate commit message	copilot -p "Generate commit message for: $(git diff --staged)"
+6	Commit changes	git commit -m "<paste generated message>"
+
+🔑 Key Takeaways
+Code review becomes comprehensive with specific prompts
+Refactoring is safer when you generate tests first
+Debugging benefits from showing Copilot CLI the error AND the code
+Test generation should include edge cases and error scenarios
+Git integration automates commit messages and PR descriptions

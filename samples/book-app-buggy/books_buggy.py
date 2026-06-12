@@ -1,6 +1,7 @@
 import json
 from dataclasses import dataclass, asdict
 from typing import List, Optional
+from difflib import SequenceMatcher
 
 DATA_FILE = "data.json"
 
@@ -48,11 +49,25 @@ class BookCollection:
         return self.books
 
     def find_book_by_title(self, title: str) -> Optional[Book]:
-        # BUG 1: Case-sensitive comparison - "the hobbit" won't find "The Hobbit"
+        # Fixed: Case-insensitive comparison with fuzzy matching for typos
+        search_lower = title.lower()
+        
+        # First try exact case-insensitive match
         for book in self.books:
-            if book.title == title:
+            if book.title.lower() == search_lower:
                 return book
-        return None
+        
+        # If no exact match, try fuzzy matching (similarity >= 0.8)
+        best_match = None
+        best_ratio = 0.8  # Threshold for fuzzy matching
+        
+        for book in self.books:
+            ratio = SequenceMatcher(None, search_lower, book.title.lower()).ratio()
+            if ratio > best_ratio:
+                best_ratio = ratio
+                best_match = book
+        
+        return best_match
 
     def mark_as_read(self, title: str) -> bool:
         # BUG 5: Marks ALL books as read instead of just the matching one

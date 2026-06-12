@@ -5,6 +5,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pytest
 import books
 from books import BookCollection
+from exceptions import InvalidYearRangeError
 
 
 @pytest.fixture(autouse=True)
@@ -169,10 +170,10 @@ def test_list_by_year_empty_result():
 
 
 def test_list_by_year_invalid_range_raises():
-    """Test that start > end raises ValueError."""
+    """Test that start > end raises InvalidYearRangeError."""
     collection = BookCollection()
 
-    with pytest.raises(ValueError, match="start .* must be <= end"):
+    with pytest.raises(InvalidYearRangeError):
         collection.list_by_year(2000, 1990)
 
 
